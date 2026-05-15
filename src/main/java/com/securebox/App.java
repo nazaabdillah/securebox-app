@@ -12,16 +12,13 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-// Import Model & IoT
 import com.securebox.models.EkspedisiServer;
 import com.securebox.models.Paket;
 import com.securebox.models.Pengguna;
 import com.securebox.models.SecureBoxLocker;
 import com.securebox.models.DatabaseHelper;
 
-// Import ZXing untuk QR Code
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
@@ -29,166 +26,246 @@ public class App extends Application {
 
     private EkspedisiServer server = new EkspedisiServer();
     private SecureBoxLocker loker = new SecureBoxLocker("LOKER-001");
-    private Pengguna user = new Pengguna("U01", "Qori Naza", 200000.0);
+    private Pengguna user = new Pengguna("U01", "QORI NAZA", 200000.0);
     private Paket paketAktif = null;
+
+    // --- PALET WARNA PROFESSIONAL ---
+    private final String OFF_WHITE = "#F7F7F7"; 
+    private final String KLIEN_BLUE = "#0047AB"; 
+    private final String PURE_BLACK = "#000000"; 
+    private final String NEON_GREEN = "#00FF7F"; 
+    private final String NEON_RED = "#FF3131";   
+
+    // --- NEUBRUTALISM REFINED (COMPACT) ---
+    private final String FONT_FAMILY = "-fx-font-family: 'Arial Black'; ";
+    
+    private final String NEU_CARD = FONT_FAMILY +
+        "-fx-background-color: #FFFFFF; " +
+        "-fx-border-color: " + PURE_BLACK + "; " +
+        "-fx-border-width: 3px; " +
+        "-fx-effect: dropshadow(one-pass-box, " + PURE_BLACK + ", 0, 0, 6, 6);";
+
+    private final String NEU_INPUT = FONT_FAMILY +
+        "-fx-background-color: #FFFFFF; " +
+        "-fx-text-fill: " + PURE_BLACK + "; " +
+        "-fx-prompt-text-fill: #A0A0A0; " +
+        "-fx-border-color: " + PURE_BLACK + "; " +
+        "-fx-border-width: 3px; " +
+        "-fx-padding: 10px; " +
+        "-fx-font-size: 13px; " +
+        "-fx-font-weight: bold;";
+
+    private final String NEU_BTN_PRIMARY = FONT_FAMILY +
+        "-fx-background-color: " + KLIEN_BLUE + "; " +
+        "-fx-text-fill: white; " +
+        "-fx-font-weight: 900; " +
+        "-fx-border-color: " + PURE_BLACK + "; " +
+        "-fx-border-width: 3px; " +
+        "-fx-effect: dropshadow(one-pass-box, " + PURE_BLACK + ", 0, 0, 4, 4); " +
+        "-fx-cursor: hand; " +
+        "-fx-padding: 10px;";
+
+    private final String NEU_BTN_SUCCESS = FONT_FAMILY +
+        "-fx-background-color: " + NEON_GREEN + "; " +
+        "-fx-text-fill: " + PURE_BLACK + "; " +
+        "-fx-font-weight: 900; " +
+        "-fx-border-color: " + PURE_BLACK + "; " +
+        "-fx-border-width: 3px; " +
+        "-fx-effect: dropshadow(one-pass-box, " + PURE_BLACK + ", 0, 0, 4, 4); " +
+        "-fx-cursor: hand; " +
+        "-fx-padding: 10px;";
 
     @Override
     public void start(Stage stage) {
-        // 1. Inisialisasi Database
         DatabaseHelper.inisialisasiDatabase();
 
-        // 2. Main Layout dengan TabPane
-        TabPane tabPane = new TabPane();
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        // --- HEADER (DIPERKECIL) ---
+        VBox titleBox = new VBox(2);
+        titleBox.setAlignment(Pos.CENTER);
+        Label title = new Label("SECURE-BOX");
+        title.setStyle(FONT_FAMILY + "-fx-text-fill: " + KLIEN_BLUE + "; -fx-font-size: 32px; -fx-font-weight: 900; -fx-letter-spacing: 2px;");
+        Label subtitle = new Label("IOT LOGISTICS PROTOCOL");
+        subtitle.setStyle(FONT_FAMILY + "-fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: bold; -fx-background-color: " + PURE_BLACK + "; -fx-padding: 2px 8px;");
+        titleBox.getChildren().addAll(title, subtitle);
 
-        // ==========================================
-        //        TAB 1 : HALAMAN LOKER (USER/KURIR)
-        // ==========================================
-        Tab tabLoker = new Tab("📱 Layar Loker");
+        // --- TAB LOKER ---
+        VBox viewLoker = new VBox(15); // Dikurangi dari 25
         
-        // Card Saldo
-        VBox cardSaldo = new VBox(5);
-        cardSaldo.setStyle("-fx-background-color: white; -fx-background-radius: 12px; -fx-padding: 15px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);");
-        Label lblUser = new Label("Hai, " + user.getNama() + " 👋");
+        VBox cardSaldo = new VBox(2);
+        cardSaldo.setStyle(NEU_CARD);
+        cardSaldo.setPadding(new Insets(10, 15, 10, 15));
+        Label lblUser = new Label("OPERATOR: " + user.getNama().toUpperCase());
+        lblUser.setStyle(FONT_FAMILY + "-fx-font-weight: bold; -fx-font-size: 11px; -fx-text-fill: " + KLIEN_BLUE + ";");
         Label lblSaldo = new Label("Rp " + String.format("%,.0f", user.getSaldoEWallet()));
-        lblSaldo.setStyle("-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #333333;");
-        cardSaldo.getChildren().addAll(lblUser, new Label("Saldo e-Wallet"), lblSaldo);
+        lblSaldo.setStyle(FONT_FAMILY + "-fx-font-size: 28px; -fx-font-weight: 900;");
+        cardSaldo.getChildren().addAll(lblUser, lblSaldo);
 
-        // Area Interaction
-        VBox cardAction = new VBox(15);
-        cardAction.setStyle("-fx-background-color: white; -fx-background-radius: 12px; -fx-padding: 20px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);");
+        VBox cardAction = new VBox(12);
+        cardAction.setStyle(NEU_CARD);
+        cardAction.setPadding(new Insets(15, 20, 15, 20));
         cardAction.setAlignment(Pos.CENTER);
 
         TextField inputResi = new TextField();
-        inputResi.setPromptText("Kurir: Masukkan No. Resi");
-        inputResi.setStyle("-fx-background-radius: 8px; -fx-padding: 10px;");
+        inputResi.setPromptText("INPUT NO. RESI");
+        inputResi.setStyle(NEU_INPUT);
 
-        Button btnVerify = new Button("Verifikasi & Munculkan QR");
-        btnVerify.setStyle("-fx-background-color: #00AA5B; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8px; -fx-padding: 10px 20px; -fx-cursor: hand;");
+        Button btnVerify = new Button("VERIFY PROTOCOL");
+        btnVerify.setStyle(NEU_BTN_PRIMARY);
+        btnVerify.setMaxWidth(Double.MAX_VALUE);
 
-        // Layar LCD Loker (Tempat QR Code)
+        // Layar LCD UI (Dimaksimalkan tingginya agar tidak makan tempat)
         StackPane layarLCD = new StackPane();
-        layarLCD.setMinHeight(220);
-        layarLCD.setStyle("-fx-background-color: #F3F4F5; -fx-background-radius: 8px; -fx-border-color: #DDDDDD; -fx-border-radius: 8px;");
+        layarLCD.setMinHeight(180); // Dikurangi dari 220
+        layarLCD.setStyle("-fx-background-color: #FFFFFF; -fx-border-color: " + PURE_BLACK + "; -fx-border-width: 3px;");
         
-        Label placeholderText = new Label("Menunggu Input Resi...");
-        ImageView qrImageView = new ImageView();
-        layarLCD.getChildren().addAll(placeholderText, qrImageView);
+        Label statusMsg = new Label("AWAITING INPUT...");
+        statusMsg.setStyle(FONT_FAMILY + "-fx-font-weight: 900; -fx-font-size: 14px; -fx-text-fill: #A0A0A0;");
+        ImageView qrView = new ImageView();
+        qrView.setFitHeight(150);
+        qrView.setPreserveRatio(true);
+        layarLCD.getChildren().addAll(statusMsg, qrView);
 
-        Button btnPay = new Button("Scan QR & Bayar COD");
+        Button btnPay = new Button("AUTHORIZE & PAY");
         btnPay.setDisable(true);
-        btnPay.setStyle("-fx-background-color: #00AA5B; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8px; -fx-padding: 12px 30px;");
+        btnPay.setStyle(NEU_BTN_SUCCESS);
+        btnPay.setMaxWidth(Double.MAX_VALUE);
 
-        // Logika Tombol Verifikasi
         btnVerify.setOnAction(e -> {
             paketAktif = server.verifikasiResi(inputResi.getText());
             if (paketAktif != null && !paketAktif.getStatusPembayaran().equals("Lunas")) {
-                // Generate QR Code Asli
-                String tokenData = loker.generateQRPembayaran(paketAktif);
-                qrImageView.setImage(generateQR(tokenData));
-                placeholderText.setVisible(false);
+                qrView.setImage(generateQR(loker.generateQRPembayaran(paketAktif)));
+                statusMsg.setVisible(false);
                 btnPay.setDisable(false);
-                System.out.println(">> [SISTEM] QR Code Generated: " + tokenData);
             } else if (paketAktif != null && paketAktif.getStatusPembayaran().equals("Lunas")) {
-                placeholderText.setText("✅ PAKET SUDAH LUNAS");
-                placeholderText.setVisible(true);
-                qrImageView.setImage(null);
+                statusMsg.setText("STATUS: PAID"); 
+                statusMsg.setStyle(FONT_FAMILY + "-fx-text-fill: " + KLIEN_BLUE + "; -fx-font-weight: 900;");
+                statusMsg.setVisible(true); qrView.setImage(null); btnPay.setDisable(true);
             } else {
-                placeholderText.setText("❌ RESI TIDAK VALID");
-                placeholderText.setVisible(true);
-                qrImageView.setImage(null);
+                statusMsg.setText("ERR: INVALID"); 
+                statusMsg.setStyle(FONT_FAMILY + "-fx-text-fill: " + NEON_RED + "; -fx-font-weight: 900;");
+                statusMsg.setVisible(true); qrView.setImage(null); btnPay.setDisable(true);
             }
         });
 
-        // Logika Tombol Bayar (Trigger IoT & DB)
         btnPay.setOnAction(e -> {
             if (user.bayarCOD(paketAktif.getNominalCOD())) {
                 server.updateStatusLunas(paketAktif.getNoResi());
-                loker.bukaPintu(); // Memicu sinyal MQTT ke Wokwi
-                
+                loker.bukaPintu(); 
                 lblSaldo.setText("Rp " + String.format("%,.0f", user.getSaldoEWallet()));
-                placeholderText.setText("✅ PEMBAYARAN BERHASIL\nPintu Loker Terbuka!");
-                placeholderText.setVisible(true);
-                qrImageView.setImage(null);
-                btnPay.setDisable(true);
-                inputResi.clear();
-            } else {
-                placeholderText.setText("⚠️ SALDO TIDAK CUKUP");
-                placeholderText.setVisible(true);
+                statusMsg.setText("SUCCESS - OPEN"); 
+                statusMsg.setStyle(FONT_FAMILY + "-fx-text-fill: " + KLIEN_BLUE + "; -fx-font-weight: 900;");
+                statusMsg.setVisible(true); qrView.setImage(null);
+                btnPay.setDisable(true); inputResi.clear();
             }
         });
 
         cardAction.getChildren().addAll(inputResi, btnVerify, layarLCD, btnPay);
-        VBox viewLoker = new VBox(20, cardSaldo, cardAction);
-        viewLoker.setPadding(new Insets(20));
-        viewLoker.setStyle("-fx-background-color: #F8F9FA;");
-        tabLoker.setContent(viewLoker);
+        viewLoker.getChildren().addAll(cardSaldo, cardAction);
 
-        // ==========================================
-        //        TAB 2 : HALAMAN ADMIN (INPUT DB)
-        // ==========================================
-        Tab tabAdmin = new Tab("💻 Admin Server");
+        // --- TAB ADMIN ---
+        VBox viewAdmin = new VBox(15);
         VBox cardAdmin = new VBox(15);
+        cardAdmin.setStyle(NEU_CARD);
         cardAdmin.setPadding(new Insets(20));
-        cardAdmin.setAlignment(Pos.TOP_CENTER);
+        cardAdmin.setAlignment(Pos.CENTER);
 
-        Label lblAdmin = new Label("Input Paket Baru ke Sistem");
-        lblAdmin.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
+        Label lblAdmin = new Label("DATABASE SYSTEM");
+        lblAdmin.setStyle(FONT_FAMILY + "-fx-font-weight: 900; -fx-font-size: 18px;");
 
-        TextField resiIn = new TextField(); resiIn.setPromptText("No Resi");
-        TextField hargaIn = new TextField(); hargaIn.setPromptText("Harga COD");
-        Button btnSave = new Button("Simpan ke Database");
-        btnSave.setStyle("-fx-background-color: #1A73E8; -fx-text-fill: white; -fx-font-weight: bold;");
+        TextField resiIn = new TextField(); 
+        resiIn.setPromptText("NEW RESI");
+        resiIn.setStyle(NEU_INPUT);
+        
+        TextField hargaIn = new TextField(); 
+        hargaIn.setPromptText("AMOUNT");
+        hargaIn.setStyle(NEU_INPUT);
+
+        Button btnSave = new Button("COMMIT TO DATABASE");
+        btnSave.setStyle(NEU_BTN_PRIMARY);
+        btnSave.setMaxWidth(Double.MAX_VALUE);
+
+        Label lblNotif = new Label("");
+        lblNotif.setStyle(FONT_FAMILY + "-fx-font-weight: 900; -fx-font-size: 12px;");
 
         btnSave.setOnAction(e -> {
             try {
                 double harga = Double.parseDouble(hargaIn.getText());
                 if(server.tambahPaketBaru(resiIn.getText(), harga)) {
-                    Alert a = new Alert(Alert.AlertType.INFORMATION, "Paket Berhasil Disimpan!");
-                    a.show();
+                    lblNotif.setText("SUCCESS: DATA STORED");
+                    lblNotif.setStyle(FONT_FAMILY + "-fx-text-fill: " + KLIEN_BLUE + ";");
                     resiIn.clear(); hargaIn.clear();
+                } else {
+                    lblNotif.setText("ERR: DUPLICATE");
+                    lblNotif.setStyle(FONT_FAMILY + "-fx-text-fill: " + NEON_RED + ";");
                 }
             } catch (Exception ex) {
-                System.out.println("Input Salah!");
+                lblNotif.setText("ERR: NUMERIC ONLY");
+                lblNotif.setStyle(FONT_FAMILY + "-fx-text-fill: " + NEON_RED + ";");
             }
         });
 
-        cardAdmin.getChildren().addAll(lblAdmin, resiIn, hargaIn, btnSave);
-        tabAdmin.setContent(cardAdmin);
+        cardAdmin.getChildren().addAll(lblAdmin, resiIn, hargaIn, btnSave, lblNotif);
+        viewAdmin.getChildren().add(cardAdmin);
 
-        // Header & Assemble
-        tabPane.getTabs().addAll(tabLoker, tabAdmin);
-        HBox header = new HBox(new Label("SECURE-BOX IOT"));
-        header.setStyle("-fx-background-color: #00AA5B; -fx-padding: 15px;");
-        header.setAlignment(Pos.CENTER_LEFT);
-        ((Label)header.getChildren().get(0)).setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 18px;");
+        // --- NAVIGASI ---
+        HBox navBar = new HBox(10);
+        navBar.setAlignment(Pos.CENTER);
+        
+        String tStyle = FONT_FAMILY + "-fx-background-color: white; -fx-border-color: black; -fx-border-width: 2px; -fx-cursor: hand; -fx-padding: 8px 15px; -fx-font-size: 12px; -fx-font-weight: 900;";
+        Button navLoker = new Button("TERMINAL");
+        Button navAdmin = new Button("ADMIN");
+        navLoker.setStyle(tStyle + "-fx-background-color: " + KLIEN_BLUE + "; -fx-text-fill: white;");
+        navAdmin.setStyle(tStyle);
 
-        VBox root = new VBox(header, tabPane);
-        stage.setScene(new Scene(root, 380, 650));
-        stage.setTitle("SecureBox - Prototype");
+        StackPane contentArea = new StackPane(viewLoker); 
+        contentArea.setPadding(new Insets(10, 0, 0, 0));
+
+        navLoker.setOnAction(e -> {
+            navLoker.setStyle(tStyle + "-fx-background-color: " + KLIEN_BLUE + "; -fx-text-fill: white;");
+            navAdmin.setStyle(tStyle);
+            contentArea.getChildren().setAll(viewLoker);
+        });
+
+        navAdmin.setOnAction(e -> {
+            navAdmin.setStyle(tStyle + "-fx-background-color: " + KLIEN_BLUE + "; -fx-text-fill: white;");
+            navLoker.setStyle(tStyle);
+            contentArea.getChildren().setAll(viewAdmin);
+        });
+
+        navBar.getChildren().addAll(navLoker, navAdmin);
+
+        // --- ROOT LAYOUT ---
+        VBox mainLayout = new VBox(15, titleBox, navBar, contentArea);
+        mainLayout.setPadding(new Insets(20)); // Dikurangi dari 30
+        mainLayout.setAlignment(Pos.TOP_CENTER);
+        mainLayout.setStyle("-fx-background-color: " + OFF_WHITE + ";");
+
+        ScrollPane scrollPane = new ScrollPane(mainLayout);
+        scrollPane.setFitToWidth(true); 
+        scrollPane.setStyle("-fx-background: " + OFF_WHITE + "; -fx-background-color: " + OFF_WHITE + "; -fx-border-color: transparent;");
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+
+        Scene scene = new Scene(scrollPane, 420, 680); // Dikurangi ke 680 agar pas di layar laptop
+        stage.setScene(scene);
+        stage.setTitle("SECURE-BOX v2.1");
         stage.setResizable(false);
         stage.show();
     }
 
-    // FUNGSI SAKTI: Mengubah Teks menjadi Gambar QR Code
     private WritableImage generateQR(String text) {
         try {
-            QRCodeWriter qrCodeWriter = new QRCodeWriter();
-            BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, 200, 200);
-            WritableImage image = new WritableImage(200, 200);
-            PixelWriter pw = image.getPixelWriter();
+            QRCodeWriter writer = new QRCodeWriter();
+            BitMatrix matrix = writer.encode(text, BarcodeFormat.QR_CODE, 200, 200);
+            WritableImage img = new WritableImage(200, 200);
+            PixelWriter pw = img.getPixelWriter();
             for (int x = 0; x < 200; x++) {
                 for (int y = 0; y < 200; y++) {
-                    pw.setColor(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+                    pw.setColor(x, y, matrix.get(x, y) ? Color.BLACK : Color.WHITE);
                 }
             }
-            return image;
-        } catch (Exception e) {
-            return null;
-        }
+            return img;
+        } catch (Exception e) { return null; }
     }
 
-    public static void main(String[] args) {
-        launch();
-    }
+    public static void main(String[] args) { launch(); }
 }

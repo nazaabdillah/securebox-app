@@ -1,0 +1,47 @@
+/* Neubrutalism v3.1 - Professional Protocol */
+.root {
+    -fx-background-color: #F7F7F7;
+    -fx-font-family: 'Arial Black', sans-serif; /* Font tegas khas Neubrutalism */
+}
+
+.neu-card {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #000000;
+    -fx-border-width: 4px;
+    -fx-effect: dropshadow(one-pass-box, #000000, 0, 0, 7, 7);
+}
+
+.neu-input {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #000000;
+    -fx-border-width: 4px;
+    -fx-padding: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #000000;
+}
+
+.btn-primary {
+    -fx-background-color: #0047AB; /* Klien Blue */
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-border-color: #000000;
+    -fx-border-width: 4px;
+    -fx-effect: dropshadow(one-pass-box, #000000, 0, 0, 4, 4);
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #003380;
+    -fx-translate-x: 2px;
+    -fx-translate-y: 2px;
+    -fx-effect: dropshadow(one-pass-box, #000000, 0, 0, 2, 2);
+}
+
+.btn-success {
+    -fx-background-color: #00FF7F;
+    -fx-text-fill: #000000;
+    -fx-font-weight: 900;
+    -fx-border-color: #000000;
+    -fx-border-width: 4px;
+    -fx-effect: dropshadow(one-pass-box, #000000, 0, 0, 4, 4);
+}
